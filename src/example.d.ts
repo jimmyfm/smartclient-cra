@@ -1,0 +1,3 @@
+interface ExampleTSDefinition {
+    exampleField: number;
+}
