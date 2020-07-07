@@ -1,27 +1,36 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
-
-/**
- * The following import has a syntax error:
- * 
- * SyntaxError: C:\Users\lpolvani\Desktop\smartclient-cra\src\isomorphic\smartclient.d.ts: Binding 'eval' in strict mode (1125:9)
- * > 1125 | function eval(expression:string):any;
- *        |          ^
- * 
- * This makes impossible to use SC TS definitions in this CRA project.
- */ 
-// import './isomorphic/smartclient.d.ts'
-
-/**
- * Cross test to check that TS definitions can be used and they work correctly both with "npm start" and VSC auto completion.
- */
-import './example.d.ts'
-
-var x : ExampleTSDefinition = {} as ExampleTSDefinition;
-x.exampleField = 42;
+import { countryData } from "./dataSource";
+import './isomorphic/smartclient.d.ts'
 
 function App() {
+  const ISC: any = window['isc'];
+
+  useEffect(() => {
+    let grid = ISC.ListGrid.create({
+      ID: "countryList",
+      width: 500, height: 224, alternateRecordStyles: true,
+      data: countryData,
+      fields: [
+        { name: "countryCode", title: "Flag", width: 50, type: "image", imageURLPrefix: "flags/16/", imageURLSuffix: ".png" },
+        { name: "countryName", title: "Country" },
+        { name: "population", title: "Population", format: ",0" },
+        { name: "area", title: "Area (km&sup2;)", format: ",0" }
+      ],
+      // initial sort on Population, high-to-low
+      sortField: 2,
+      sortDirection: "descending"
+    }) as isc.ListGrid;
+
+    console.log(`grid`, grid);
+
+    grid.click = () => {
+      console.log(`grid.click`);
+      return true;
+    }
+  }, [ISC])
+
   return (
     <div className="App">
       <header className="App-header">
