@@ -1,35 +1,43 @@
 import React, { useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { countryData } from "./dataSource";
 import './isomorphic/smartclient.d.ts'
+const ISC: any = window['isc'];
+ISC.RPCManager.allowCrossDomainCalls = true;
+
+/*
+// This works, no CORS issues
+fetch('https://api.collegefootballdata.com/conferences?testing=cors')
+  .then(r => r.json())
+  .then(j => console.log(`testing remote fetch`, j));
+*/
 
 function App() {
-  const ISC: any = window['isc'];
 
   useEffect(() => {
-    let grid = ISC.ListGrid.create({
-      ID: "countryList",
-      width: 500, height: 224, alternateRecordStyles: true,
-      data: countryData,
+    let conferencesDS = ISC.DataSource.create({
+      dataFormat: "json",
+      dataURL: "https://api.collegefootballdata.com/conferences",
       fields: [
-        { name: "countryCode", title: "Flag", width: 50, type: "image", imageURLPrefix: "flags/16/", imageURLSuffix: ".png" },
-        { name: "countryName", title: "Country" },
-        { name: "population", title: "Population", format: ",0" },
-        { name: "area", title: "Area (km&sup2;)", format: ",0" }
-      ],
-      // initial sort on Population, high-to-low
-      sortField: 2,
-      sortDirection: "descending"
+        { title: "ID", name: "id" },
+        { title: "Name", name: "name" },
+        { title: "Abbreviation", name: "abbreviation" },
+        { title: "Short Name", name: "short_name" },
+      ]
+    }) as isc.DataSource;
+
+    let conferencesGrid = ISC.ListGrid.create({
+      width: "100%",
+      height: 150,
+      dataSource: conferencesDS,
+      autoFetchData: true,
     }) as isc.ListGrid;
 
-    console.log(`grid`, grid);
-
-    grid.click = () => {
-      console.log(`grid.click`);
+    conferencesGrid.rowClick = (record: isc.ListGridRecord, recordNum: number, fieldNum: number, keyboardGenerated?: boolean | undefined) => {
+      console.log(`rowClick`, recordNum, fieldNum, keyboardGenerated, record);
       return true;
-    }
-  }, [ISC])
+    };
+  }, [])
 
   return (
     <div className="App">
